@@ -1,0 +1,170 @@
+from __future__ import annotations
+from random import choice, randint
+from abc import ABC, abstractmethod
+from collections import deque
+
+
+# == Abstract Base Classes ==
+class GenerationStrategy(ABC):
+    @abstractmethod
+    def generate(self, size_x: int, size_y: int) -> set[tuple[int, int]]:
+        pass
+
+
+class SolvingStrategy(ABC):
+    @abstractmethod
+    def solve(
+        self,
+        corridors: set[tuple[int, int]],
+        start: tuple[int, int],
+        end: tuple[int, int],
+    ) -> set[tuple[int, int]] | None:
+        pass
+
+
+class RenderStrategy(ABC):
+    @abstractmethod
+    def render(
+        self,
+        size_x: int,
+        size_y: int,
+        corridors: set[tuple[int, int]] | None,
+        solution_path: set[tuple[int, int]] | None,
+        start: tuple[int, int] | None,
+        end: tuple[int, int] | None,
+    ) -> str:
+        pass
+
+
+# == Helper Functions ==
+def get_neighbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
+    return {
+        (coord[0], coord[1] - step),  # North
+        (coord[0] + step, coord[1]),  # East
+        (coord[0], coord[1] + step),  # South
+        (coord[0] - step, coord[1]),  # West
+    }
+
+
+# == Concrete classes==
+class ASCIIRender(RenderStrategy):
+    def move_cursor_to_upper_left(self):
+        print("\x1b[H", end="")
+
+    def render(
+        self,
+        size_x: int,
+        size_y: int,
+        corridors: set[tuple[int, int]] | None,
+        solution_path: set[tuple[int, int]] | None,
+        start: tuple[int, int] | None,
+        end: tuple[int, int] | None,
+    ) -> str:
+        lines = []
+        for y in range(size_y):
+            line = []
+            for x in range(size_x):
+                if start and (x, y) == start:
+                    line.append("S")
+                elif end and (x, y) == end:
+                    line.append("E")
+                elif solution_path and (x, y) in solution_path:
+                    line.append("+")
+                elif corridors and (x, y) in corridors:
+                    line.append(" ")  # Open corridor
+                else:
+                    line.append("█")  # solid wall
+            lines.append("".join(line))
+        return "\n".join(lines)
+
+
+class RandomDFS(GenerationStrategy):
+    # Filter out already visited neighbors
+    def get_unvisited_nieghbors(
+        self, neighbors: set[tuple[int, int]], visited: set
+    ) -> set[tuple[int, int]] | None:
+        return neighbors - visited
+
+    # Remove neighbors that fall outside the grid
+    def remove_out_of_bounds_nieghbors(
+        self, nieghbors: set[tuple[int, int]], size_x: int, size_y: int
+    ) -> list[tuple[int, int]] | None:
+        in_bounds_nbrs = []
+        for nbr in nieghbors:
+            if (size_x - 1) > nbr[0] > 0 and (size_y - 1) > nbr[1] > 0:
+                in_bounds_nbrs.append(nbr)
+        return in_bounds_nbrs
+
+    def generate(self, size_x: int, size_y: int) -> set[tuple[int, int]]:
+        corridors = set()  # Store carved corridor cells (including midpoints)
+        visited = set()  # Track cells that have been visited by DFS
+        search_q = []  # Stack (list used as LIFO) for DFS backtracking
+
+        start_coord = (randint(0, size_x - 1), randint(0, size_y - 1))
+
+        visited.add(start_coord)
+        search_q.append(start_coord)
+
+        while search_q:
+            next_cell = None
+            current_cell = search_q.pop()
+            # Look two steps away (because midpoints represent walls)
+            nbrs = get_neighbors(current_cell, 2)
+            unvisited_nbrs = self.get_unvisited_nieghbors(nbrs, visited)
+
+            if unvisited_nbrs:
+                unvisited_nbrs = self.remove_out_of_bounds_nieghbors(
+                    unvisited_nbrs, size_x, size_y
+                )
+
+            if unvisited_nbrs:
+                # Push current cell back (we'll return here if dead-end)
+                search_q.append(current_cell)
+                # Choose a random unvisited neighbor
+                next_cell = choice(list(unvisited_nbrs))
+                # Carve wall between current and next (the midpoint)
+                mid = (
+                    (current_cell[0] + next_cell[0]) // 2,
+                    (current_cell[1] + next_cell[1]) // 2,
+                )
+
+                # Mark as visited and carve
+                visited.add(next_cell)
+                search_q.append(next_cell)
+                corridors.add(mid)
+                corridors.add(next_cell)
+        else:
+            return corridors
+
+
+class BFSSolver(SolvingStrategy):
+    def solve(
+        self,
+        corridors: set[tuple[int, int]],
+        start: tuple[int, int],
+        end: tuple[int, int],
+    ) -> set[tuple[int, int]] | None:
+        search_queue = deque([start])  # Search queue with start added
+        searched = {start}  # Mark the start as searched
+        parent = {}
+
+        while search_queue:
+            cell = search_queue.popleft()  # Pop the next coordinate
+            if cell == end:  # End found!: reconstruct path
+                path = [cell]
+                while path[-1] != start:
+                    path.append(parent[path[-1]])
+                path.reverse()
+                return set(path)
+
+            elif cell in corridors:  # Found new empty hallway/start
+                for nbr in get_neighbors(cell, step=1):
+                    if (
+                        nbr not in searched and nbr in corridors
+                    ):  # If the cell isnt a wall or hasnt been visited...
+                        search_queue.append(nbr)  # Explore further later...
+                        searched.add(nbr)  # Mark visited
+                        parent[nbr] = cell  # Record the neighbors parent
+
+        else:  # Queue exhausted: no path exists
+            return None
