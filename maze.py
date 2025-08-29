@@ -18,24 +18,44 @@ class Maze:
     gen_strat: GenerationStrategy
     solve_strat: SolvingStrategy
     rend_strat: RenderStrategy
+    start_cell_buffer: int = 3
+    end_cell_buffer: int = 3
+    live: bool = False
+    solution_path: set[tuple[int, int]] | None = None
+    corridors: set[tuple[int, int]] | None = None
 
-    def generate(self, live=False) -> None:
-        self.corridors = self.gen_strat.generate(self.size_x, self.size_y)
+    def generate(self, live=None) -> None:
+        if not live:
+            live = self.live
+
+        self.corridors = self.gen_strat.generate(
+            self.size_x, self.size_y, renderer=self.rend_strat, live=live
+        )
 
         # Assign random start/end points
         self.start = choice(list(self.corridors))
         self.end = choice(list(self.corridors))
-        while self.start[0] > 3:
+        while self.start[0] > self.start_cell_buffer:
             self.start = choice(list(self.corridors))
-        while self.end[0] < self.size_x - 3:
+        while self.end[0] < self.size_x - self.end_cell_buffer:
             self.end = choice(list(self.corridors))
 
-    def solve(self):
-        self.solution_path = self.solve_strat.solve(
-            corridors=self.corridors, start=self.start, end=self.end
-        )
+    def solve(self, live=None) -> None:
+        if not live:
+            live = self.live
 
-    def render(self, live=False) -> str:
+        if self.corridors:
+            self.solution_path = self.solve_strat.solve(
+                size_x=self.size_x,
+                size_y=self.size_y,
+                corridors=self.corridors,
+                start=self.start,
+                end=self.end,
+                renderer=self.rend_strat,
+                live=live,
+            )
+
+    def render(self) -> str:
         return self.rend_strat.render(
             size_x=self.size_x,
             size_y=self.size_y,
@@ -48,11 +68,12 @@ class Maze:
 
 if __name__ == "__main__":
     new_maze = Maze(
-        size_x=160,
-        size_y=11,
+        size_x=200,
+        size_y=41,
         gen_strat=RandomDFS(),
         solve_strat=BFSSolver(),
         rend_strat=ASCIIRender(),
+        live=True,
     )
 
     new_maze.generate()
