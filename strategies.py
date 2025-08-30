@@ -88,15 +88,15 @@ class ASCIIRender(RenderStrategy):
             line = []
             for x in range(size_x):
                 if start and (x, y) == start:
-                    line.append("S")
+                    line.append("\x1b[31mS\x1b[0m")
                 elif end and (x, y) == end:
-                    line.append("E")
+                    line.append("\x1b[34mE\x1b[0m")
                 elif solution_path and (x, y) in solution_path:
-                    line.append("+")
+                    line.append("\x1b[32m█\x1b[0m")
                 elif search_q and (x, y) in search_q:
                     line.append("@")
                 elif visited_cells and (x, y) in visited_cells:
-                    line.append(".")
+                    line.append("\x1b[33m█\x1b[0m")
                 elif corridors and (x, y) in corridors:
                     line.append(" ")  # Open corridor
                 else:
