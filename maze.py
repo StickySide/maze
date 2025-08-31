@@ -1,8 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from random import choice
+from time import time
 from strategies import (
     BFSSolver,
+    DFSRecursiveSolver,
     GenerationStrategy,
     SolvingStrategy,
     RenderStrategy,
@@ -21,6 +23,7 @@ class Maze:
     start_cell_buffer: int = 3
     end_cell_buffer: int = 3
     live: bool = False
+    live_speed_delay: float = 0.0
     solution_path: set[tuple[int, int]] | None = None
     corridors: set[tuple[int, int]] | None = None
 
@@ -40,10 +43,7 @@ class Maze:
         while self.end[0] < self.size_x - self.end_cell_buffer:
             self.end = choice(list(self.corridors))
 
-    def solve(self, live=None) -> None:
-        if not live:
-            live = self.live
-
+    def solve(self) -> None:
         if self.corridors:
             self.solution_path = self.solve_strat.solve(
                 size_x=self.size_x,
@@ -51,8 +51,9 @@ class Maze:
                 corridors=self.corridors,
                 start=self.start,
                 end=self.end,
+                live=self.live,
+                live_speed_delay=self.live_speed_delay,
                 renderer=self.rend_strat,
-                live=live,
             )
 
     def render(self) -> str:
@@ -68,14 +69,36 @@ class Maze:
 
 if __name__ == "__main__":
     new_maze = Maze(
-        size_x=200,
-        size_y=41,
+        size_x=100,
+        size_y=40,
         gen_strat=RandomDFS(),
-        solve_strat=BFSSolver(),
+        solve_strat=DFSRecursiveSolver(),
         rend_strat=ASCIIRender(),
-        live=True,
+        live=False,
+        live_speed_delay=0.001,
     )
 
     new_maze.generate()
+
+    start_time = time()
     new_maze.solve()
-    print(new_maze.render())
+    end_time = time()
+    dfs_solution = new_maze.render()
+
+    dfs_time = end_time - start_time
+
+    new_maze.solve_strat = BFSSolver()
+
+    start_time = time()
+    new_maze.solve()
+    end_time = time()
+    bfs_solution = new_maze.render()
+
+    bfs_time = end_time - start_time
+
+    print(f"DFS SOLUTION\n{dfs_solution}")
+    print(f"BFS SOLUTION\n{bfs_solution}")
+    print(
+        f"{'Identical solutions' if bfs_solution == dfs_solution else 'Different solutions'}"
+    )
+    print(f"DFS Solution time: {dfs_time}\nBFS Solution time: {bfs_time}")

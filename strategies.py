@@ -2,6 +2,7 @@ from __future__ import annotations
 from random import choice, randint
 from abc import ABC, abstractmethod
 from collections import deque
+from time import sleep
 
 
 # == Abstract Base Classes ==
@@ -27,6 +28,7 @@ class SolvingStrategy(ABC):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
+        live_speed_delay: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         pass
@@ -44,13 +46,15 @@ class RenderStrategy(ABC):
         solution_path: set[tuple[int, int]] | None = None,
         search_q: set[tuple[int, int]] | None = None,
         visited_cells: set[tuple[int, int]] | None = None,
+        live: bool = False,
+        live_speed_delay: float = 0.0,
     ) -> str:
         pass
 
 
 # == Helper Functions ==
-def get_neighbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
-    """Gets the 4 nieghbors of a coordinate
+def get_nieghbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
+    """Gets the 4 neighbors of a coordinate
 
     Arguments:
         coord -- Base coordinate
@@ -66,12 +70,21 @@ def get_neighbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
         (coord[0] - step, coord[1]),  # West
     }
 
+    # Remove neighbors that fall outside the grid
+
+
+def remove_out_of_bounds_neighbors(
+    neighbors: set[tuple[int, int]], size_x: int, size_y: int
+) -> list[tuple[int, int]] | None:
+    in_bounds_nbrs = []
+    for nbr in neighbors:
+        if (size_x - 1) > nbr[0] > 0 and (size_y - 1) > nbr[1] > 0:
+            in_bounds_nbrs.append(nbr)
+    return in_bounds_nbrs
+
 
 # == Concrete classes==
 class ASCIIRender(RenderStrategy):
-    def move_cursor_to_upper_left(self):
-        print("\x1b[H", end="")
-
     def render(
         self,
         size_x: int,
@@ -82,8 +95,14 @@ class ASCIIRender(RenderStrategy):
         solution_path: set[tuple[int, int]] | None = None,
         search_q: set[tuple[int, int]] | None = None,
         visited_cells: set[tuple[int, int]] | None = None,
+        live: bool = False,
+        live_speed_delay: float = 0.0,
     ) -> str:
-        lines = ["\x1b[H"]  # Cursor to upper left
+        if live:
+            lines = ["\x1b[H"]  # Cursor to upper left
+        else:
+            lines = []
+        sleep(live_speed_delay)
         for y in range(size_y):
             line = []
             for x in range(size_x):
@@ -107,20 +126,10 @@ class ASCIIRender(RenderStrategy):
 
 class RandomDFS(GenerationStrategy):
     # Filter out already visited neighbors
-    def get_unvisited_nieghbors(
+    def get_unvisited_neighbors(
         self, neighbors: set[tuple[int, int]], visited: set
     ) -> set[tuple[int, int]] | None:
         return neighbors - visited
-
-    # Remove neighbors that fall outside the grid
-    def remove_out_of_bounds_nieghbors(
-        self, nieghbors: set[tuple[int, int]], size_x: int, size_y: int
-    ) -> list[tuple[int, int]] | None:
-        in_bounds_nbrs = []
-        for nbr in nieghbors:
-            if (size_x - 1) > nbr[0] > 0 and (size_y - 1) > nbr[1] > 0:
-                in_bounds_nbrs.append(nbr)
-        return in_bounds_nbrs
 
     def generate(
         self,
@@ -150,11 +159,11 @@ class RandomDFS(GenerationStrategy):
             next_cell = None
             current_cell = search_q.pop()
             # Look two steps away (because midpoints represent walls)
-            nbrs = get_neighbors(current_cell, 2)
-            unvisited_nbrs = self.get_unvisited_nieghbors(nbrs, visited)
+            nbrs = get_nieghbors(current_cell, 2)
+            unvisited_nbrs = self.get_unvisited_neighbors(nbrs, visited)
 
             if unvisited_nbrs:
-                unvisited_nbrs = self.remove_out_of_bounds_nieghbors(
+                unvisited_nbrs = remove_out_of_bounds_neighbors(
                     unvisited_nbrs, size_x, size_y
                 )
 
@@ -184,11 +193,89 @@ class RandomDFS(GenerationStrategy):
                         solution_path=None,
                         start=None,
                         end=None,
+                        live=live,
                     )
                 )
 
         else:
             return corridors
+
+
+class DFSRecursiveSolver(SolvingStrategy):
+    def solve(
+        self,
+        size_x: int,
+        size_y: int,
+        corridors: set[tuple[int, int]],
+        start: tuple[int, int],
+        end: tuple[int, int],
+        live: bool = False,
+        live_speed_delay: float = 0.0,
+        renderer: RenderStrategy | None = None,
+    ) -> set[tuple[int, int]] | None:
+        visited = {start}  # Track visited cells
+        frontier_path = {start}  # Track the current path being explored
+
+        def dfs(next_cell: tuple[int, int]) -> set[tuple[int, int]]:
+            """Performs a depth-first search to find a path to the end cell.
+
+            Arguments:
+                next_cell -- The current cell being explored.
+
+            Returns:
+                A set of coordinates representing the path to the end cell, or an empty set if no path exists.
+            """
+            nbrs = get_nieghbors(next_cell, 1)
+            nbrs = remove_out_of_bounds_neighbors(nbrs, size_x, size_y)
+
+            if live and renderer:
+                print(
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        start=start,
+                        end=end,
+                        corridors=corridors,
+                        search_q={next_cell},
+                        solution_path=frontier_path,
+                        visited_cells=visited,
+                        live=live,
+                        live_speed_delay=live_speed_delay,
+                    )
+                )
+
+            if not nbrs:  # If there are no valid neighboring cells...
+                return set()
+            elif end in nbrs:  # We found the end!
+                return {end}
+            elif nbrs:  # If valid cells remain to be explored
+                for nbr in nbrs:
+                    if nbr not in visited and nbr in corridors:
+                        visited.add(nbr)  # Mark valid neighbors visited
+                        frontier_path.add(nbr)
+                        if solution := dfs(nbr):
+                            return solution.union({nbr})
+            frontier_path.remove(next_cell)
+            return set()  # If no solution is found in any neighbors
+
+        path = dfs(start)
+
+        if live and renderer:
+            if live and renderer:
+                print(
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        start=start,
+                        end=end,
+                        corridors=corridors,
+                        visited_cells=None,
+                        solution_path=path,
+                        live=live,
+                    )
+                )
+
+        return path
 
 
 class BFSSolver(SolvingStrategy):
@@ -200,6 +287,7 @@ class BFSSolver(SolvingStrategy):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
+        live_speed_delay: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         search_queue = deque([start])  # Search queue with start added
@@ -222,12 +310,14 @@ class BFSSolver(SolvingStrategy):
                             solution_path=set(path),
                             start=start,
                             end=end,
+                            live_speed_delay=live_speed_delay,
+                            live=live,
                         )
                     )
                 return set(path)
 
             elif cell in corridors:  # Found new empty hallway/start
-                for nbr in get_neighbors(cell, step=1):
+                for nbr in get_nieghbors(cell, step=1):
                     if (
                         nbr not in searched and nbr in corridors
                     ):  # If the cell isnt a wall or hasnt been visited...
@@ -245,6 +335,8 @@ class BFSSolver(SolvingStrategy):
                         visited_cells=searched,
                         start=start,
                         end=end,
+                        live_speed_delay=live_speed_delay,
+                        live=live,
                     )
                 )
 
