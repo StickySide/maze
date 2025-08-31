@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import deque
+from random import shuffle
 from helper_functions import get_nieghbors, remove_out_of_bounds_neighbors
 from render_strategies import RenderStrategy
 
@@ -69,6 +70,8 @@ class DFSRecursiveSolver(SolvingStrategy):
             elif end in nbrs:  # We found the end!
                 return {end}
             elif nbrs:  # If valid cells remain to be explored
+                nbrs = list(nbrs)
+                shuffle(nbrs)
                 for nbr in nbrs:
                     if nbr not in visited and nbr in corridors:
                         visited.add(nbr)  # Mark valid neighbors visited
@@ -151,6 +154,8 @@ class DFSSolver(SolvingStrategy):
                     )
                 return set(path)
             elif nbrs:
+                nbrs = list(nbrs)
+                shuffle(nbrs)
                 for nbr in nbrs:
                     if nbr not in visited and nbr in corridors:
                         visited.add(nbr)

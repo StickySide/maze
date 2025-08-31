@@ -56,6 +56,12 @@ class Maze:
             )
 
     def render(self) -> str:
+        """
+        Renders the maze using the specified rendering strategy.
+
+        Returns:
+            str: The rendered maze as a string.
+        """
         return self.rend_strat.render(
             size_x=self.size_x,
             size_y=self.size_y,
@@ -65,6 +71,23 @@ class Maze:
             end=self.end,
         )
 
+    def hole_punch(self, holes: int = 5) -> None:
+        """
+        Randomly adds holes to the maze by converting wall cells into corridors.
+
+        Args:
+            holes (int): The number of holes to punch in the maze.
+        """
+        if self.corridors:
+            walls = [
+                (x, y)
+                for x in range(1, self.size_x - 1)
+                for y in range(1, self.size_y - 1)
+                if (x, y) not in self.corridors
+            ]
+            for _ in range(holes):
+                self.corridors.add(choice(walls))
+
 
 if __name__ == "__main__":
     new_maze = Maze(
@@ -73,11 +96,12 @@ if __name__ == "__main__":
         gen_strat=RandomDFS(),
         solve_strat=BFSSolver(),
         rend_strat=ASCIIRender(),
-        live=True,
+        live=False,
         live_speed_delay=0,
     )
 
     new_maze.generate()
+    new_maze.hole_punch(500)
     new_maze.solve()
     bfs_solution = new_maze.render()
 
@@ -85,4 +109,6 @@ if __name__ == "__main__":
     new_maze.solve()
     dfs_solution = new_maze.render()
 
+    print(bfs_solution)
+    print(dfs_solution)
     print(bfs_solution == dfs_solution)
