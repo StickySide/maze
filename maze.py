@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from random import choice
 from time import time
-from generation_strategies import GenerationStrategy, RandomDFS
+from generation_strategies import GenerationStrategy, RandomDFS, RandomPrims
 from render_strategies import RenderStrategy, ASCIIRender
 from solver_strategies import SolvingStrategy, DFSRecursiveSolver, BFSSolver
 
@@ -63,36 +63,13 @@ class Maze:
 
 if __name__ == "__main__":
     new_maze = Maze(
-        size_x=100,
-        size_y=40,
-        gen_strat=RandomDFS(),
+        size_x=30,
+        size_y=30,
+        gen_strat=RandomPrims(),
         solve_strat=DFSRecursiveSolver(),
         rend_strat=ASCIIRender(),
-        live=False,
-        live_speed_delay=0.001,
+        live=True,
+        live_speed_delay=1,
     )
 
     new_maze.generate()
-
-    start_time = time()
-    new_maze.solve()
-    end_time = time()
-    dfs_solution = new_maze.render()
-
-    dfs_time = end_time - start_time
-
-    new_maze.solve_strat = BFSSolver()
-
-    start_time = time()
-    new_maze.solve()
-    end_time = time()
-    bfs_solution = new_maze.render()
-
-    bfs_time = end_time - start_time
-
-    print(f"DFS SOLUTION\n{dfs_solution}")
-    print(f"BFS SOLUTION\n{bfs_solution}")
-    print(
-        f"{'Identical solutions' if bfs_solution == dfs_solution else 'Different solutions'}"
-    )
-    print(f"DFS Solution time: {dfs_time}\nBFS Solution time: {bfs_time}")

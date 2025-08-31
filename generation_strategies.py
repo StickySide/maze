@@ -93,3 +93,44 @@ class RandomDFS(GenerationStrategy):
 
         else:
             return corridors
+
+
+class RandomPrims(GenerationStrategy):
+    def generate(
+        self,
+        size_x: int,
+        size_y: int,
+        live: bool = False,
+        renderer: RenderStrategy | None = None,
+    ) -> set[tuple[int, int]]:
+        start_coord = (
+            randint(0, size_x - 1),
+            randint(0, size_y - 1),
+        )  # Random start
+
+        corridors = {start_coord}
+        visited = {start_coord}
+        walls = get_nieghbors(start_coord, 2, size_x=size_x, size_y=size_y)
+
+        while walls:
+            # Randomly take a wall and make it a corridor and remove it from walls
+            next_cell = choice(list(walls))
+            corridors.add(next_cell)
+            walls.remove(next_cell)
+
+            # Add unvisited nieghbors of that new corridor to the wall list
+            nbrs = get_nieghbors(next_cell, 2, size_x=size_x, size_y=size_y)
+            nbrs = nbrs.difference(visited)
+            walls.update(nbrs)
+            visited.update(nbrs)
+
+            if live and renderer:
+                print(
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        corridors=corridors,
+                        live=True,
+                    )
+                )
+        return corridors

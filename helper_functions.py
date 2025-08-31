@@ -1,4 +1,9 @@
-def get_nieghbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
+def get_nieghbors(
+    coord: tuple[int, int],
+    step: int,
+    size_x: int | None = None,
+    size_y: int | None = None,
+) -> set[tuple[int, int]]:
     """Gets the 4 neighbors of a coordinate
 
     Arguments:
@@ -8,12 +13,25 @@ def get_nieghbors(coord: tuple[int, int], step: int) -> set[tuple[int, int]]:
     Returns:
         Set of neighbor coordinates
     """
-    return {
-        (coord[0], coord[1] - step),  # North
-        (coord[0] + step, coord[1]),  # East
-        (coord[0], coord[1] + step),  # South
-        (coord[0] - step, coord[1]),  # West
-    }
+    if size_x and size_y:
+        nbrs = [
+            (coord[0], coord[1] - step),  # North
+            (coord[0] + step, coord[1]),  # East
+            (coord[0], coord[1] + step),  # South
+            (coord[0] - step, coord[1]),  # West
+        ]
+        return {
+            nbr
+            for nbr in nbrs
+            if 0 <= nbr[0] <= size_x and 0 <= nbr[1] <= size_y
+        }
+    else:
+        return {
+            (coord[0], coord[1] - step),  # North
+            (coord[0] + step, coord[1]),  # East
+            (coord[0], coord[1] + step),  # South
+            (coord[0] - step, coord[1]),  # West
+        }
 
     # Remove neighbors that fall outside the grid
 
