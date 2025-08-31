@@ -1,7 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from random import choice
-from time import time
 from generation_strategies import GenerationStrategy, RandomDFS, RandomPrims
 from render_strategies import RenderStrategy, ASCIIRender
 from solver_strategies import SolvingStrategy, DFSRecursiveSolver, BFSSolver
@@ -63,7 +62,7 @@ class Maze:
 
 if __name__ == "__main__":
     new_maze = Maze(
-        size_x=30,
+        size_x=100,
         size_y=30,
         gen_strat=RandomPrims(),
         solve_strat=DFSRecursiveSolver(),

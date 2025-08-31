@@ -3,6 +3,7 @@ def get_nieghbors(
     step: int,
     size_x: int | None = None,
     size_y: int | None = None,
+    exclude: set[tuple[int, int]] | None = None,
 ) -> set[tuple[int, int]]:
     """Gets the 4 neighbors of a coordinate
 
@@ -13,6 +14,8 @@ def get_nieghbors(
     Returns:
         Set of neighbor coordinates
     """
+    if exclude is None:
+        exclude = set()
     if size_x and size_y:
         nbrs = [
             (coord[0], coord[1] - step),  # North
@@ -23,7 +26,9 @@ def get_nieghbors(
         return {
             nbr
             for nbr in nbrs
-            if 0 <= nbr[0] <= size_x and 0 <= nbr[1] <= size_y
+            if 0 < nbr[0] < size_x - 1
+            and 0 < nbr[1] < size_y - 1
+            and nbr not in exclude
         }
     else:
         return {

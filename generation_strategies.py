@@ -104,25 +104,46 @@ class RandomPrims(GenerationStrategy):
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         start_coord = (
-            randint(0, size_x - 1),
-            randint(0, size_y - 1),
+            randint(1, size_x - 2),
+            randint(1, size_y - 2),
         )  # Random start
 
-        corridors = {start_coord}
-        visited = {start_coord}
-        walls = get_nieghbors(start_coord, 2, size_x=size_x, size_y=size_y)
+        # 'Frontier' cells, two block away from the start cell
+        search_q: set[tuple[int, int]] = get_nieghbors(
+            start_coord, 2, size_x, size_y
+        )
 
-        while walls:
-            # Randomly take a wall and make it a corridor and remove it from walls
-            next_cell = choice(list(walls))
-            corridors.add(next_cell)
-            walls.remove(next_cell)
+        # Carved out corridor cells
+        corridors: set[tuple[int, int]] = {start_coord}
 
-            # Add unvisited nieghbors of that new corridor to the wall list
-            nbrs = get_nieghbors(next_cell, 2, size_x=size_x, size_y=size_y)
-            nbrs = nbrs.difference(visited)
-            walls.update(nbrs)
-            visited.update(nbrs)
+        while search_q:
+            frontier_cell = choice(
+                tuple(search_q)
+            )  # Pick a frontier cell at random
+            search_q.remove(frontier_cell)
+
+            # Check neighbors of that frontier cell that connect to a corridor
+            connecting_cells = [
+                nbr
+                for nbr in get_nieghbors(frontier_cell, 2, size_x, size_y)
+                if nbr in corridors
+            ]
+
+            if not connecting_cells:
+                continue
+
+            corridor_cell = choice(connecting_cells)
+            mid = (
+                (frontier_cell[0] + corridor_cell[0]) // 2,
+                (frontier_cell[1] + corridor_cell[1]) // 2,
+            )
+            corridors.add(mid)
+            corridors.add(frontier_cell)
+            search_q.update(
+                get_nieghbors(
+                    frontier_cell, 2, size_x, size_y, exclude=corridors
+                )
+            )
 
             if live and renderer:
                 print(
@@ -131,6 +152,7 @@ class RandomPrims(GenerationStrategy):
                         size_y=size_y,
                         corridors=corridors,
                         live=True,
+                        live_speed_delay=0.001,
                     )
                 )
         return corridors
