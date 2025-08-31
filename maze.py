@@ -2,15 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from random import choice
 from time import time
-from strategies import (
-    BFSSolver,
-    DFSRecursiveSolver,
-    GenerationStrategy,
-    SolvingStrategy,
-    RenderStrategy,
-    RandomDFS,
-    ASCIIRender,
-)
+from generation_strategies import GenerationStrategy, RandomDFS
+from render_strategies import RenderStrategy, ASCIIRender
+from solver_strategies import SolvingStrategy, DFSRecursiveSolver, BFSSolver
 
 
 @dataclass
