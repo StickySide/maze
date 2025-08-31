@@ -98,6 +98,86 @@ class DFSRecursiveSolver(SolvingStrategy):
         return path
 
 
+class DFSSolver(SolvingStrategy):
+    def reconstruct(
+        self,
+        parents: dict[tuple[int, int], tuple[int, int]],
+        start_cell: tuple[int, int],
+        end_cell: tuple[int, int],
+    ) -> set[tuple[int, int]]:
+        path = [end_cell]
+        while path[-1] != start_cell:
+            path.append(parents[path[-1]])
+        path.reverse()
+        return set(path)
+
+    def solve(
+        self,
+        size_x: int,
+        size_y: int,
+        corridors: set[tuple[int, int]],
+        start: tuple[int, int],
+        end: tuple[int, int],
+        live: bool = False,
+        live_speed_delay: float = 0.0,
+        renderer: RenderStrategy | None = None,
+    ) -> set[tuple[int, int]] | None:
+        search_q: list[tuple[int, int]] = [start]
+        visited = {start}
+        frontier_path = {start}
+        parents = {}
+
+        while search_q:
+            current_cell = search_q.pop()
+            nbrs = get_nieghbors(
+                current_cell, 1, size_x, size_y, exclude=visited
+            )
+            if not nbrs:
+                continue
+            elif end in nbrs:
+                path = self.reconstruct(parents, start, current_cell)
+                if live and renderer:
+                    print(
+                        renderer.render(
+                            size_x=size_x,
+                            size_y=size_y,
+                            start=start,
+                            end=end,
+                            corridors=corridors,
+                            solution_path=set(path),
+                            live=live,
+                            live_speed_delay=live_speed_delay,
+                        )
+                    )
+                return set(path)
+            elif nbrs:
+                for nbr in nbrs:
+                    if nbr not in visited and nbr in corridors:
+                        visited.add(nbr)
+                        search_q.append(nbr)
+                        frontier_path.add(nbr)
+                        parents[nbr] = current_cell
+                if live and renderer:  # Render solution if live
+                    print(
+                        renderer.render(
+                            size_x=size_x,
+                            size_y=size_y,
+                            start=start,
+                            end=end,
+                            corridors=corridors,
+                            search_q={current_cell},
+                            solution_path=self.reconstruct(
+                                parents, start, current_cell
+                            ),
+                            visited_cells=visited,
+                            live=live,
+                            live_speed_delay=live_speed_delay,
+                        )
+                    )
+        else:
+            return set()
+
+
 class BFSSolver(SolvingStrategy):
     def solve(
         self,

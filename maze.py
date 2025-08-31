@@ -3,7 +3,12 @@ from dataclasses import dataclass
 from random import choice
 from generation_strategies import GenerationStrategy, RandomDFS, RandomPrims
 from render_strategies import RenderStrategy, ASCIIRender
-from solver_strategies import SolvingStrategy, DFSRecursiveSolver, BFSSolver
+from solver_strategies import (
+    SolvingStrategy,
+    DFSSolver,
+    DFSRecursiveSolver,
+    BFSSolver,
+)
 
 
 @dataclass
@@ -20,12 +25,13 @@ class Maze:
     solution_path: set[tuple[int, int]] | None = None
     corridors: set[tuple[int, int]] | None = None
 
-    def generate(self, live=None) -> None:
-        if not live:
-            live = self.live
-
+    def generate(self) -> None:
         self.corridors = self.gen_strat.generate(
-            self.size_x, self.size_y, renderer=self.rend_strat, live=live
+            self.size_x,
+            self.size_y,
+            renderer=self.rend_strat,
+            live=self.live,
+            live_speed_delay=self.live_speed_delay,
         )
 
         # Assign random start/end points
@@ -62,13 +68,21 @@ class Maze:
 
 if __name__ == "__main__":
     new_maze = Maze(
-        size_x=100,
-        size_y=30,
-        gen_strat=RandomPrims(),
-        solve_strat=DFSRecursiveSolver(),
+        size_x=201,
+        size_y=51,
+        gen_strat=RandomDFS(),
+        solve_strat=BFSSolver(),
         rend_strat=ASCIIRender(),
         live=True,
-        live_speed_delay=1,
+        live_speed_delay=0,
     )
 
     new_maze.generate()
+    new_maze.solve()
+    bfs_solution = new_maze.render()
+
+    new_maze.solve_strat = DFSSolver()
+    new_maze.solve()
+    dfs_solution = new_maze.render()
+
+    print(bfs_solution == dfs_solution)

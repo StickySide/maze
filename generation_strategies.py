@@ -13,6 +13,7 @@ class GenerationStrategy(ABC):
         size_x: int,
         size_y: int,
         live: bool = False,
+        live_speed_delay: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         pass
@@ -30,6 +31,7 @@ class RandomDFS(GenerationStrategy):
         size_x: int,
         size_y: int,
         live: bool = False,
+        live_speed_delay: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         """Main DFS maze generation algorithm/loop
@@ -88,6 +90,7 @@ class RandomDFS(GenerationStrategy):
                         start=None,
                         end=None,
                         live=live,
+                        live_speed_delay=live_speed_delay,
                     )
                 )
 
@@ -101,6 +104,7 @@ class RandomPrims(GenerationStrategy):
         size_x: int,
         size_y: int,
         live: bool = False,
+        live_speed_delay: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         start_coord = (
@@ -144,6 +148,7 @@ class RandomPrims(GenerationStrategy):
                     frontier_cell, 2, size_x, size_y, exclude=corridors
                 )
             )
+            connecting_cells.remove(corridor_cell)
 
             if live and renderer:
                 print(
@@ -152,7 +157,7 @@ class RandomPrims(GenerationStrategy):
                         size_y=size_y,
                         corridors=corridors,
                         live=True,
-                        live_speed_delay=0.001,
+                        live_speed_delay=live_speed_delay,
                     )
                 )
         return corridors
