@@ -13,10 +13,24 @@ class GenerationStrategy(ABC):
         size_x: int,
         size_y: int,
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         pass
+
+
+class EmptyMaze(GenerationStrategy):
+    def generate(
+        self,
+        size_x: int,
+        size_y: int,
+        live: bool = False,
+        fps: float = 0,
+        renderer: RenderStrategy | None = None,
+    ) -> set[tuple[int, int]]:
+        return {
+            (x, y) for x in range(1, size_x - 1) for y in range(1, size_y - 1)
+        }
 
 
 class RandomDFS(GenerationStrategy):
@@ -31,7 +45,7 @@ class RandomDFS(GenerationStrategy):
         size_x: int,
         size_y: int,
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         """Main DFS maze generation algorithm/loop
@@ -81,17 +95,15 @@ class RandomDFS(GenerationStrategy):
                 corridors.add(next_cell)
 
             if live and renderer:
-                print(
-                    renderer.render(
-                        size_x=size_x,
-                        size_y=size_y,
-                        corridors=corridors,
-                        solution_path=None,
-                        start=None,
-                        end=None,
-                        live=live,
-                        live_speed_delay=live_speed_delay,
-                    )
+                renderer.render(
+                    size_x=size_x,
+                    size_y=size_y,
+                    corridors=corridors,
+                    solution_path=None,
+                    start=None,
+                    end=None,
+                    live=live,
+                    fps=fps,
                 )
 
         else:
@@ -104,7 +116,7 @@ class RandomPrims(GenerationStrategy):
         size_x: int,
         size_y: int,
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]]:
         start_coord = (
@@ -151,13 +163,12 @@ class RandomPrims(GenerationStrategy):
             connecting_cells.remove(corridor_cell)
 
             if live and renderer:
-                print(
-                    renderer.render(
-                        size_x=size_x,
-                        size_y=size_y,
-                        corridors=corridors,
-                        live=True,
-                        live_speed_delay=live_speed_delay,
-                    )
+                renderer.render(
+                    size_x=size_x,
+                    size_y=size_y,
+                    corridors=corridors,
+                    search_q=search_q,
+                    live=True,
+                    fps=fps,
                 )
         return corridors

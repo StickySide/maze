@@ -1,7 +1,12 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from random import choice
-from generation_strategies import GenerationStrategy, RandomDFS, RandomPrims
+from generation_strategies import (
+    EmptyMaze,
+    GenerationStrategy,
+    RandomDFS,
+    RandomPrims,
+)
 from render_strategies import RenderStrategy, ASCIIRender
 from solver_strategies import (
     SolvingStrategy,
@@ -9,6 +14,8 @@ from solver_strategies import (
     DFSRecursiveSolver,
     BFSSolver,
 )
+
+from time import time
 
 
 @dataclass
@@ -21,9 +28,10 @@ class Maze:
     start_cell_buffer: int = 3
     end_cell_buffer: int = 3
     live: bool = False
-    live_speed_delay: float = 0.0
+    fps: float = 0.0
     solution_path: set[tuple[int, int]] | None = None
     corridors: set[tuple[int, int]] | None = None
+    title_text: bool = False
 
     def generate(self) -> None:
         self.corridors = self.gen_strat.generate(
@@ -31,7 +39,7 @@ class Maze:
             self.size_y,
             renderer=self.rend_strat,
             live=self.live,
-            live_speed_delay=self.live_speed_delay,
+            fps=self.fps,
         )
 
         # Assign random start/end points
@@ -51,7 +59,7 @@ class Maze:
                 start=self.start,
                 end=self.end,
                 live=self.live,
-                live_speed_delay=self.live_speed_delay,
+                fps=self.fps,
                 renderer=self.rend_strat,
             )
 
@@ -69,6 +77,9 @@ class Maze:
             solution_path=self.solution_path,
             start=self.start,
             end=self.end,
+            title_text=f"Generator: {self.gen_strat.__class__.__name__} | Solver: {self.solve_strat.__class__.__name__}"
+            if self.title_text
+            else None,
         )
 
     def hole_punch(self, holes: int = 5) -> None:
@@ -90,25 +101,45 @@ class Maze:
 
 
 if __name__ == "__main__":
-    new_maze = Maze(
-        size_x=201,
-        size_y=51,
-        gen_strat=RandomDFS(),
-        solve_strat=BFSSolver(),
+    maze = Maze(
+        size_x=20,
+        size_y=20,
+        gen_strat=RandomPrims(),
+        solve_strat=DFSSolver(),
         rend_strat=ASCIIRender(),
-        live=False,
-        live_speed_delay=0,
+        live=True,
+        fps=60,
+        title_text=True,
     )
 
-    new_maze.generate()
-    new_maze.hole_punch(500)
-    new_maze.solve()
-    bfs_solution = new_maze.render()
+    maze.generate()
+    # maze.hole_punch(200)
+    maze.solve()
 
-    new_maze.solve_strat = DFSSolver()
-    new_maze.solve()
-    dfs_solution = new_maze.render()
+    # dfs_times = []
+    # bfs_times = []
+    # for i in range(100):
+    #     start_time = time()
+    #     maze.solve()
+    #     end_time = time()
+    #     dfs_solution = maze.render()
+    #     total_time = end_time - start_time
+    #     dfs_times.append(total_time)
+    #     print(f"Iteration {i} time: {total_time}")
 
-    print(bfs_solution)
-    print(dfs_solution)
-    print(bfs_solution == dfs_solution)
+    # maze.solve_strat = BFSSolver()
+    # for i in range(100):
+    #     start_time = time()
+    #     maze.solve()
+    #     end_time = time()
+    #     dfs_solution = maze.render()
+    #     total_time = end_time - start_time
+    #     bfs_times.append(total_time)
+    #     print(f"Iteration {i} time: {total_time}")
+
+    # print(
+    #     f"DFS Solver -- Average time for 100 solutions: {sum(dfs_times) / len(dfs_times)}"
+    # )
+    # print(
+    #     f"BFS Solver -- Average time for 100 solutions: {sum(bfs_times) / len(bfs_times)}"
+    # )

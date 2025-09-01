@@ -15,7 +15,8 @@ class RenderStrategy(ABC):
         search_q: set[tuple[int, int]] | None = None,
         visited_cells: set[tuple[int, int]] | None = None,
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
+        title_text: str | None = None,
     ) -> str:
         pass
 
@@ -33,13 +34,15 @@ class ASCIIRender(RenderStrategy):
         search_q: set[tuple[int, int]] | None = None,
         visited_cells: set[tuple[int, int]] | None = None,
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
+        title_text: str | None = None,
     ) -> str:
+        lines = []
         if live:
-            lines = ["\x1b[H"]  # Cursor to upper left
-        else:
-            lines = []
-        sleep(live_speed_delay)
+            lines.append("\x1b[H")  # Cursor to upper left
+        if title_text:
+            lines.append(title_text)
+        sleep(1 / fps if fps != 0 else 0)
         for y in range(size_y):
             line = []
             for x in range(size_x):
@@ -58,4 +61,7 @@ class ASCIIRender(RenderStrategy):
                 else:
                     line.append("█")  # solid wall
             lines.append("".join(line))
-        return "\n".join(lines)
+        frame = "\n".join(lines)
+        if live:
+            print(frame)
+        return frame

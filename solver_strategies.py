@@ -15,7 +15,7 @@ class SolvingStrategy(ABC):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         pass
@@ -31,7 +31,7 @@ class DFSRecursiveSolver(SolvingStrategy):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         visited = {start}  # Track visited cells
@@ -50,19 +50,17 @@ class DFSRecursiveSolver(SolvingStrategy):
             nbrs = remove_out_of_bounds_neighbors(nbrs, size_x, size_y)
 
             if live and renderer:
-                print(
-                    renderer.render(
-                        size_x=size_x,
-                        size_y=size_y,
-                        start=start,
-                        end=end,
-                        corridors=corridors,
-                        search_q={next_cell},
-                        solution_path=frontier_path,
-                        visited_cells=visited,
-                        live=live,
-                        live_speed_delay=live_speed_delay,
-                    )
+                renderer.render(
+                    size_x=size_x,
+                    size_y=size_y,
+                    start=start,
+                    end=end,
+                    corridors=corridors,
+                    search_q={next_cell},
+                    solution_path=frontier_path,
+                    visited_cells=visited,
+                    live=live,
+                    fps=fps,
                 )
 
             if not nbrs:  # If there are no valid neighboring cells...
@@ -85,17 +83,15 @@ class DFSRecursiveSolver(SolvingStrategy):
 
         if live and renderer:
             if live and renderer:
-                print(
-                    renderer.render(
-                        size_x=size_x,
-                        size_y=size_y,
-                        start=start,
-                        end=end,
-                        corridors=corridors,
-                        visited_cells=None,
-                        solution_path=path,
-                        live=live,
-                    )
+                renderer.render(
+                    size_x=size_x,
+                    size_y=size_y,
+                    start=start,
+                    end=end,
+                    corridors=corridors,
+                    visited_cells=None,
+                    solution_path=path,
+                    live=live,
                 )
 
         return path
@@ -122,7 +118,7 @@ class DFSSolver(SolvingStrategy):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         search_q: list[tuple[int, int]] = [start]
@@ -140,18 +136,17 @@ class DFSSolver(SolvingStrategy):
             elif end in nbrs:
                 path = self.reconstruct(parents, start, current_cell)
                 if live and renderer:
-                    print(
-                        renderer.render(
-                            size_x=size_x,
-                            size_y=size_y,
-                            start=start,
-                            end=end,
-                            corridors=corridors,
-                            solution_path=set(path),
-                            live=live,
-                            live_speed_delay=live_speed_delay,
-                        )
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        start=start,
+                        end=end,
+                        corridors=corridors,
+                        solution_path=set(path),
+                        live=live,
+                        fps=fps,
                     )
+
                 return set(path)
             elif nbrs:
                 nbrs = list(nbrs)
@@ -163,22 +158,21 @@ class DFSSolver(SolvingStrategy):
                         frontier_path.add(nbr)
                         parents[nbr] = current_cell
                 if live and renderer:  # Render solution if live
-                    print(
-                        renderer.render(
-                            size_x=size_x,
-                            size_y=size_y,
-                            start=start,
-                            end=end,
-                            corridors=corridors,
-                            search_q={current_cell},
-                            solution_path=self.reconstruct(
-                                parents, start, current_cell
-                            ),
-                            visited_cells=visited,
-                            live=live,
-                            live_speed_delay=live_speed_delay,
-                        )
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        start=start,
+                        end=end,
+                        corridors=corridors,
+                        search_q={current_cell},
+                        solution_path=self.reconstruct(
+                            parents, start, current_cell
+                        ),
+                        visited_cells=visited,
+                        live=live,
+                        fps=fps,
                     )
+
         else:
             return set()
 
@@ -192,7 +186,7 @@ class BFSSolver(SolvingStrategy):
         start: tuple[int, int],
         end: tuple[int, int],
         live: bool = False,
-        live_speed_delay: float = 0.0,
+        fps: float = 0.0,
         renderer: RenderStrategy | None = None,
     ) -> set[tuple[int, int]] | None:
         search_queue = deque([start])  # Search queue with start added
@@ -207,18 +201,17 @@ class BFSSolver(SolvingStrategy):
                     path.append(parent[path[-1]])
                 path.reverse()
                 if live and renderer:  # Render solution if live
-                    print(
-                        renderer.render(
-                            size_x=size_x,
-                            size_y=size_y,
-                            corridors=corridors,
-                            solution_path=set(path),
-                            start=start,
-                            end=end,
-                            live_speed_delay=live_speed_delay,
-                            live=live,
-                        )
+                    renderer.render(
+                        size_x=size_x,
+                        size_y=size_y,
+                        corridors=corridors,
+                        solution_path=set(path),
+                        start=start,
+                        end=end,
+                        fps=fps,
+                        live=live,
                     )
+
                 return set(path)
 
             elif cell in corridors:  # Found new empty hallway/start
@@ -231,18 +224,16 @@ class BFSSolver(SolvingStrategy):
                         parent[nbr] = cell  # Record the neighbors parent
 
             if live and renderer:
-                print(
-                    renderer.render(
-                        size_x=size_x,
-                        size_y=size_y,
-                        corridors=corridors,
-                        search_q=set(search_queue),
-                        visited_cells=searched,
-                        start=start,
-                        end=end,
-                        live_speed_delay=live_speed_delay,
-                        live=live,
-                    )
+                renderer.render(
+                    size_x=size_x,
+                    size_y=size_y,
+                    corridors=corridors,
+                    search_q=set(search_queue),
+                    visited_cells=searched,
+                    start=start,
+                    end=end,
+                    fps=fps,
+                    live=live,
                 )
 
         else:  # Queue exhausted: no path exists
