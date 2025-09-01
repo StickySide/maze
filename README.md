@@ -1,4 +1,3 @@
-# maze
-
-A Python framework for generating and solving mazes with ASCII visualization.  
-Supports multiple algorithms and rendering strategies, with live terminal animation and optional color highlighting.
+  
+A Python package for generating and solving mazes in the terminal.  
+It provides a simple API for creating mazes, visualizing them with ASCII graphics, and experimenting with different algorithms.

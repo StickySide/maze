@@ -27,19 +27,21 @@ class Maze:
     rend_strat: RenderStrategy
     start_cell_buffer: int = 3
     end_cell_buffer: int = 3
-    live: bool = False
-    fps: float = 0.0
     solution_path: set[tuple[int, int]] | None = None
     corridors: set[tuple[int, int]] | None = None
     title_text: bool = False
+    default_fps: int = 30
 
-    def generate(self) -> None:
+    def generate(self, live: bool = False, fps: int = 0) -> None:
+        if fps == 0:
+            fps = self.default_fps
+
         self.corridors = self.gen_strat.generate(
             self.size_x,
             self.size_y,
             renderer=self.rend_strat,
-            live=self.live,
-            fps=self.fps,
+            live=live,
+            fps=fps,
         )
 
         # Assign random start/end points
@@ -50,7 +52,14 @@ class Maze:
         while self.end[0] < self.size_x - self.end_cell_buffer:
             self.end = choice(list(self.corridors))
 
-    def solve(self) -> None:
+    def solve(
+        self,
+        live: bool = False,
+        fps: float = 0,
+    ) -> None:
+        if fps == 0:
+            fps = self.default_fps
+
         if self.corridors:
             self.solution_path = self.solve_strat.solve(
                 size_x=self.size_x,
@@ -58,8 +67,8 @@ class Maze:
                 corridors=self.corridors,
                 start=self.start,
                 end=self.end,
-                live=self.live,
-                fps=self.fps,
+                live=live,
+                fps=fps,
                 renderer=self.rend_strat,
             )
 
@@ -102,19 +111,17 @@ class Maze:
 
 if __name__ == "__main__":
     maze = Maze(
-        size_x=20,
+        size_x=108,
         size_y=20,
         gen_strat=RandomPrims(),
-        solve_strat=DFSSolver(),
+        solve_strat=BFSSolver(),
         rend_strat=ASCIIRender(),
-        live=True,
-        fps=60,
         title_text=True,
     )
 
     maze.generate()
-    # maze.hole_punch(200)
-    maze.solve()
+    maze.hole_punch(50)
+    maze.solve(live=True, fps=120)
 
     # dfs_times = []
     # bfs_times = []
