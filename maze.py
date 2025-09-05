@@ -14,8 +14,8 @@ from solver_strategies import (
     DFSRecursiveSolver,
     BFSSolver,
 )
-
-from time import time
+from helper_functions import Coord
+# from time import time
 
 
 @dataclass
@@ -27,8 +27,8 @@ class Maze:
     rend_strat: RenderStrategy
     start_cell_buffer: int = 3
     end_cell_buffer: int = 3
-    solution_path: set[tuple[int, int]] | None = None
-    corridors: set[tuple[int, int]] | None = None
+    solution_path: set[Coord] | None = None
+    corridors: set[Coord] | None = None
     title_text: bool = False
     default_fps: int = 30
 
@@ -56,7 +56,7 @@ class Maze:
         self,
         live: bool = False,
         fps: float = 0,
-    ) -> None:
+    ) -> set[Coord] | None:
         if fps == 0:
             fps = self.default_fps
 
@@ -71,6 +71,7 @@ class Maze:
                 fps=fps,
                 renderer=self.rend_strat,
             )
+            return self.solution_path
 
     def render(self) -> str:
         """
@@ -120,9 +121,8 @@ if __name__ == "__main__":
     )
 
     maze.generate()
-    maze.hole_punch(50)
-    maze.solve(live=True, fps=120)
-
+    test = maze.solve(live=True)
+    print(test)
     # dfs_times = []
     # bfs_times = []
     # for i in range(100):

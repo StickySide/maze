@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from collections import deque
 from random import shuffle
-from helper_functions import get_nieghbors, remove_out_of_bounds_neighbors
+from helper_functions import (
+    get_nieghbors,
+    Coord,
+    remove_out_of_bounds_neighbors,
+)
 from render_strategies import RenderStrategy
 
 
@@ -11,13 +15,13 @@ class SolvingStrategy(ABC):
         self,
         size_x: int,
         size_y: int,
-        corridors: set[tuple[int, int]],
-        start: tuple[int, int],
-        end: tuple[int, int],
+        corridors: set[Coord],
+        start: Coord,
+        end: Coord,
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]] | None:
+    ) -> set[Coord] | None:
         pass
 
 
@@ -27,17 +31,17 @@ class DFSRecursiveSolver(SolvingStrategy):
         self,
         size_x: int,
         size_y: int,
-        corridors: set[tuple[int, int]],
-        start: tuple[int, int],
-        end: tuple[int, int],
+        corridors: set[Coord],
+        start: Coord,
+        end: Coord,
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]] | None:
+    ) -> set[Coord] | None:
         visited = {start}  # Track visited cells
         frontier_path = {start}  # Track the current path being explored
 
-        def dfs(next_cell: tuple[int, int]) -> set[tuple[int, int]]:
+        def dfs(next_cell: Coord) -> set[Coord]:
             """Performs a depth-first search to find a path to the end cell.
 
             Arguments:
@@ -100,10 +104,10 @@ class DFSRecursiveSolver(SolvingStrategy):
 class DFSSolver(SolvingStrategy):
     def reconstruct(
         self,
-        parents: dict[tuple[int, int], tuple[int, int]],
-        start_cell: tuple[int, int],
-        end_cell: tuple[int, int],
-    ) -> set[tuple[int, int]]:
+        parents: dict[Coord, Coord],
+        start_cell: Coord,
+        end_cell: Coord,
+    ) -> set[Coord]:
         path = [end_cell]
         while path[-1] != start_cell:
             path.append(parents[path[-1]])
@@ -114,14 +118,14 @@ class DFSSolver(SolvingStrategy):
         self,
         size_x: int,
         size_y: int,
-        corridors: set[tuple[int, int]],
-        start: tuple[int, int],
-        end: tuple[int, int],
+        corridors: set[Coord],
+        start: Coord,
+        end: Coord,
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]] | None:
-        search_q: list[tuple[int, int]] = [start]
+    ) -> set[Coord] | None:
+        search_q: list[Coord] = [start]
         visited = {start}
         frontier_path = {start}
         parents = {}
@@ -182,13 +186,13 @@ class BFSSolver(SolvingStrategy):
         self,
         size_x: int,
         size_y: int,
-        corridors: set[tuple[int, int]],
-        start: tuple[int, int],
-        end: tuple[int, int],
+        corridors: set[Coord],
+        start: Coord,
+        end: Coord,
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]] | None:
+    ) -> set[Coord] | None:
         search_queue = deque([start])  # Search queue with start added
         searched = {start}  # Mark the start as searched
         parent = {}

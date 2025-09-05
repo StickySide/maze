@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from time import sleep
+from helper_functions import Coord
 
 
 class RenderStrategy(ABC):
@@ -8,12 +9,12 @@ class RenderStrategy(ABC):
         self,
         size_x: int,
         size_y: int,
-        start: tuple[int, int] | None = None,
-        end: tuple[int, int] | None = None,
-        corridors: set[tuple[int, int]] | None = None,
-        solution_path: set[tuple[int, int]] | None = None,
-        search_q: set[tuple[int, int]] | None = None,
-        visited_cells: set[tuple[int, int]] | None = None,
+        start: Coord | None = None,
+        end: Coord | None = None,
+        corridors: set[Coord] | None = None,
+        solution_path: set[Coord] | None = None,
+        search_q: set[Coord] | None = None,
+        visited_cells: set[Coord] | None = None,
         live: bool = False,
         fps: float = 0.0,
         title_text: str | None = None,
@@ -27,12 +28,12 @@ class ASCIIRender(RenderStrategy):
         self,
         size_x: int,
         size_y: int,
-        start: tuple[int, int] | None = None,
-        end: tuple[int, int] | None = None,
-        corridors: set[tuple[int, int]] | None = None,
-        solution_path: set[tuple[int, int]] | None = None,
-        search_q: set[tuple[int, int]] | None = None,
-        visited_cells: set[tuple[int, int]] | None = None,
+        start: Coord | None = None,
+        end: Coord | None = None,
+        corridors: set[Coord] | None = None,
+        solution_path: set[Coord] | None = None,
+        search_q: set[Coord] | None = None,
+        visited_cells: set[Coord] | None = None,
         live: bool = False,
         fps: float = 0.0,
         title_text: str | None = None,

@@ -2,7 +2,11 @@ from __future__ import annotations
 from random import choice, randint
 from abc import ABC, abstractmethod
 from render_strategies import RenderStrategy
-from helper_functions import get_nieghbors, remove_out_of_bounds_neighbors
+from helper_functions import (
+    get_nieghbors,
+    remove_out_of_bounds_neighbors,
+    Coord,
+)
 
 
 # == Abstract Base Classes ==
@@ -15,7 +19,7 @@ class GenerationStrategy(ABC):
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]]:
+    ) -> set[Coord]:
         pass
 
 
@@ -27,7 +31,7 @@ class EmptyMaze(GenerationStrategy):
         live: bool = False,
         fps: float = 0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]]:
+    ) -> set[Coord]:
         return {
             (x, y) for x in range(1, size_x - 1) for y in range(1, size_y - 1)
         }
@@ -36,8 +40,8 @@ class EmptyMaze(GenerationStrategy):
 class RandomDFS(GenerationStrategy):
     # Filter out already visited neighbors
     def get_unvisited_neighbors(
-        self, neighbors: set[tuple[int, int]], visited: set
-    ) -> set[tuple[int, int]] | None:
+        self, neighbors: set[Coord], visited: set
+    ) -> set[Coord] | None:
         return neighbors - visited
 
     def generate(
@@ -47,7 +51,7 @@ class RandomDFS(GenerationStrategy):
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]]:
+    ) -> set[Coord]:
         """Main DFS maze generation algorithm/loop
 
         Returns:
@@ -118,19 +122,17 @@ class RandomPrims(GenerationStrategy):
         live: bool = False,
         fps: float = 0.0,
         renderer: RenderStrategy | None = None,
-    ) -> set[tuple[int, int]]:
+    ) -> set[Coord]:
         start_coord = (
             randint(1, size_x - 2),
             randint(1, size_y - 2),
         )  # Random start
 
         # 'Frontier' cells, two block away from the start cell
-        search_q: set[tuple[int, int]] = get_nieghbors(
-            start_coord, 2, size_x, size_y
-        )
+        search_q: set[Coord] = get_nieghbors(start_coord, 2, size_x, size_y)
 
         # Carved out corridor cells
-        corridors: set[tuple[int, int]] = {start_coord}
+        corridors: set[Coord] = {start_coord}
 
         while search_q:
             frontier_cell = choice(

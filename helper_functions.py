@@ -1,3 +1,7 @@
+Coord = tuple[int, int]
+"""Coord: Type alias for a coordinate pair (x, y) in the maze."""
+
+
 def get_nieghbors(
     coord: tuple[int, int],
     step: int,
