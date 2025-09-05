@@ -99,14 +99,13 @@ class RandomDFS(GenerationStrategy):
                 corridors.add(next_cell)
 
             if live and renderer:
-                renderer.render(
+                renderer.render_to_screen(
                     size_x=size_x,
                     size_y=size_y,
                     corridors=corridors,
                     solution_path=None,
                     start=None,
                     end=None,
-                    live=live,
                     fps=fps,
                 )
 
@@ -165,7 +164,7 @@ class RandomPrims(GenerationStrategy):
             connecting_cells.remove(corridor_cell)
 
             if live and renderer:
-                renderer.render(
+                renderer.render_to_screen(
                     size_x=size_x,
                     size_y=size_y,
                     corridors=corridors,

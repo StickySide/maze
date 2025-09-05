@@ -5,7 +5,7 @@ from helper_functions import Coord
 
 class RenderStrategy(ABC):
     @abstractmethod
-    def render(
+    def _render(
         self,
         size_x: int,
         size_y: int,
@@ -21,10 +21,16 @@ class RenderStrategy(ABC):
     ) -> str:
         pass
 
+    def render_to_string(self, *args, **kwargs) -> str | None:
+        return self._render(live=False, *args, **kwargs)
+
+    def render_to_screen(self, *args, **kwargs) -> None:
+        print(self._render(live=True, *args, **kwargs))
+
 
 # == Concrete classes==
 class ASCIIRender(RenderStrategy):
-    def render(
+    def _render(
         self,
         size_x: int,
         size_y: int,

@@ -32,7 +32,9 @@ class Maze:
     title_text: bool = False
     default_fps: int = 30
 
-    def generate(self, live: bool = False, fps: int = 0) -> None:
+    def generate(
+        self, live: bool = False, fps: int = 0, holes: int = 0
+    ) -> None:
         if fps == 0:
             fps = self.default_fps
 
@@ -43,6 +45,9 @@ class Maze:
             live=live,
             fps=fps,
         )
+
+        if holes > 0:
+            self.hole_punch(holes)
 
         # Assign random start/end points
         self.start = choice(list(self.corridors))
@@ -73,14 +78,14 @@ class Maze:
             )
             return self.solution_path
 
-    def render(self) -> str:
+    def render(self) -> str | None:
         """
         Renders the maze using the specified rendering strategy.
 
         Returns:
             str: The rendered maze as a string.
         """
-        return self.rend_strat.render(
+        return self.rend_strat.render_to_string(
             size_x=self.size_x,
             size_y=self.size_y,
             corridors=self.corridors,
@@ -115,14 +120,15 @@ if __name__ == "__main__":
         size_x=108,
         size_y=20,
         gen_strat=RandomPrims(),
-        solve_strat=BFSSolver(),
+        solve_strat=DFSSolver(),
         rend_strat=ASCIIRender(),
         title_text=True,
     )
 
-    maze.generate()
-    test = maze.solve(live=True)
+    maze.generate(holes=500)
+    test = maze.solve(live=True, fps=120)
     print(test)
+
     # dfs_times = []
     # bfs_times = []
     # for i in range(100):
