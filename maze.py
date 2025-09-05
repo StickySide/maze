@@ -78,7 +78,7 @@ class Maze:
             )
             return self.solution_path
 
-    def render(self) -> str | None:
+    def render(self) -> str:
         """
         Renders the maze using the specified rendering strategy.
 
@@ -95,6 +95,16 @@ class Maze:
             title_text=f"Generator: {self.gen_strat.__class__.__name__} | Solver: {self.solve_strat.__class__.__name__}"
             if self.title_text
             else None,
+        )
+
+    def render_to_screen(self) -> None:
+        self.rend_strat.render_to_screen(
+            size_x=self.size_x,
+            size_y=self.size_y,
+            corridors=self.corridors,
+            solution_path=self.solution_path,
+            start=self.start,
+            end=self.end,
         )
 
     def hole_punch(self, holes: int = 5) -> None:
@@ -125,9 +135,8 @@ if __name__ == "__main__":
         title_text=True,
     )
 
-    maze.generate(holes=500)
-    test = maze.solve(live=True, fps=120)
-    print(test)
+    maze.generate(holes=10000)
+    solution = maze.solve(live=True, fps=120)
 
     # dfs_times = []
     # bfs_times = []

@@ -21,7 +21,7 @@ class RenderStrategy(ABC):
     ) -> str:
         pass
 
-    def render_to_string(self, *args, **kwargs) -> str | None:
+    def render_to_string(self, *args, **kwargs) -> str:
         return self._render(live=False, *args, **kwargs)
 
     def render_to_screen(self, *args, **kwargs) -> None:
