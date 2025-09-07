@@ -37,14 +37,14 @@ class ASCIIRender(RenderStrategy):
         fps: float = 0.0,
         title_text: str | None = None,
     ) -> str:
-        lines = []
+        lines: list[str] = []
         if live:
             lines.append("\x1b[H")  # Cursor to upper left
         if title_text:
             lines.append(title_text)
         sleep(1 / fps if fps != 0 else 0)
         for y in range(size_y):
-            line = []
+            line: list[str] = []
             for x in range(size_x):
                 if start and (x, y) == start:
                     line.append("\x1b[31mS\x1b[0m")
