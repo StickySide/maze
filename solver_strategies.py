@@ -195,25 +195,27 @@ class BFSSolver(SolvingStrategy):
         searched = {start}  # Mark the start as searched
         parent: dict[Coord, Coord] = {}
 
+        def _reconstruct_path() -> list[Coord]:
+            path: list[Coord] = [cell]
+            while path[-1] != start:
+                path.append(parent[path[-1]])
+            path.reverse()
+            if live and renderer:  # Render solution if live
+                renderer.render_to_screen(
+                    size_x=size_x,
+                    size_y=size_y,
+                    corridors=corridors,
+                    solution_path=set(path),
+                    start=start,
+                    end=end,
+                    fps=fps,
+                )
+            return path
+
         while search_queue:
             cell = search_queue.popleft()  # Pop the next coordinate
             if cell == end:  # End found!: reconstruct path
-                path = [cell]
-                while path[-1] != start:
-                    path.append(parent[path[-1]])
-                path.reverse()
-                if live and renderer:  # Render solution if live
-                    renderer.render_to_screen(
-                        size_x=size_x,
-                        size_y=size_y,
-                        corridors=corridors,
-                        solution_path=set(path),
-                        start=start,
-                        end=end,
-                        fps=fps,
-                    )
-
-                return set(path)
+                return set(_reconstruct_path())
 
             elif cell in corridors:  # Found new empty hallway/start
                 for nbr in get_nieghbors(cell, step=1):
