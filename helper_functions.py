@@ -56,7 +56,7 @@ def remove_out_of_bounds_neighbors(
     Returns:
         List of in-bounds neighbor coordinates
     """
-    in_bounds_nbrs = []
+    in_bounds_nbrs: list[Coord] = []
     for nbr in neighbors:
         if (size_x - 1) > nbr[0] > 0 and (size_y - 1) > nbr[1] > 0:
             in_bounds_nbrs.append(nbr)

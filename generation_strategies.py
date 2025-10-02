@@ -32,15 +32,13 @@ class EmptyMaze(GenerationStrategy):
         fps: float = 0,
         renderer: RenderStrategy | None = None,
     ) -> set[Coord]:
-        return {
-            (x, y) for x in range(1, size_x - 1) for y in range(1, size_y - 1)
-        }
+        return {(x, y) for x in range(1, size_x - 1) for y in range(1, size_y - 1)}
 
 
 class RandomDFS(GenerationStrategy):
     # Filter out already visited neighbors
     def get_unvisited_neighbors(
-        self, neighbors: set[Coord], visited: set
+        self, neighbors: set[Coord], visited: set[Coord]
     ) -> set[Coord] | None:
         return neighbors - visited
 
@@ -57,9 +55,11 @@ class RandomDFS(GenerationStrategy):
         Returns:
             Set of coordinates representing the maze's corridors
         """
-        corridors = set()  # Store carved corridor cells (including midpoints)
-        visited = set()  # Track cells that have been visited by DFS
-        search_q = []  # Stack (list used as LIFO) for DFS backtracking
+        corridors: set[Coord] = (
+            set()
+        )  # Store carved corridor cells (including midpoints)
+        visited: set[Coord] = set()  # Track cells that have been visited by DFS
+        search_q: list[Coord] = []  # Stack (list used as LIFO) for DFS backtracking
 
         start_coord = (
             randint(0, size_x - 1),
@@ -134,9 +134,7 @@ class RandomPrims(GenerationStrategy):
         corridors: set[Coord] = {start_coord}
 
         while search_q:
-            frontier_cell = choice(
-                tuple(search_q)
-            )  # Pick a frontier cell at random
+            frontier_cell = choice(tuple(search_q))  # Pick a frontier cell at random
             search_q.remove(frontier_cell)
 
             # Check neighbors of that frontier cell that connect to a corridor
@@ -157,9 +155,7 @@ class RandomPrims(GenerationStrategy):
             corridors.add(mid)
             corridors.add(frontier_cell)
             search_q.update(
-                get_nieghbors(
-                    frontier_cell, 2, size_x, size_y, exclude=corridors
-                )
+                get_nieghbors(frontier_cell, 2, size_x, size_y, exclude=corridors)
             )
             connecting_cells.remove(corridor_cell)
 

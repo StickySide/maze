@@ -32,9 +32,7 @@ class Maze:
     title_text: bool = False
     default_fps: int = 30
 
-    def generate(
-        self, live: bool = False, fps: int = 0, holes: int = 0
-    ) -> None:
+    def generate(self, live: bool = False, fps: int = 0, holes: int = 0) -> None:
         if fps == 0:
             fps = self.default_fps
 

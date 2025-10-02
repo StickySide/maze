@@ -124,14 +124,18 @@ class DFSSolver(SolvingStrategy):
         renderer: RenderStrategy | None = None,
     ) -> set[Coord] | None:
         search_q: list[Coord] = [start]
-        visited = {start}
-        frontier_path = {start}
-        parents = {}
+        visited: set[Coord] = {start}
+        frontier_path: set[Coord] = {start}
+        parents: dict[Coord, Coord] = {}
 
         while search_q:
             current_cell = search_q.pop()
             nbrs = get_nieghbors(
-                current_cell, 1, size_x, size_y, exclude=visited
+                coord=current_cell,
+                step=1,
+                size_x=size_x,
+                size_y=size_y,
+                exclude=visited,
             )
             if not nbrs:
                 continue
@@ -166,9 +170,7 @@ class DFSSolver(SolvingStrategy):
                         end=end,
                         corridors=corridors,
                         search_q={current_cell},
-                        solution_path=self.reconstruct(
-                            parents, start, current_cell
-                        ),
+                        solution_path=self.reconstruct(parents, start, current_cell),
                         visited_cells=visited,
                         fps=fps,
                     )
@@ -191,7 +193,7 @@ class BFSSolver(SolvingStrategy):
     ) -> set[Coord] | None:
         search_queue = deque([start])  # Search queue with start added
         searched = {start}  # Mark the start as searched
-        parent = {}
+        parent: dict[Coord, Coord] = {}
 
         while search_queue:
             cell = search_queue.popleft()  # Pop the next coordinate
