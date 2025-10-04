@@ -165,7 +165,6 @@ class RandomPrims(GenerationStrategy):
                     size_y=size_y,
                     corridors=corridors,
                     search_q=search_q,
-                    live=True,
                     fps=fps,
                 )
         return corridors
