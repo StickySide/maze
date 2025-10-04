@@ -159,12 +159,14 @@ class RandomPrims(GenerationStrategy):
             )
             connecting_cells.remove(corridor_cell)
 
+            adjusted_fps: float = fps * len(search_q)
+
             if live and renderer:
                 renderer.render_to_screen(
                     size_x=size_x,
                     size_y=size_y,
                     corridors=corridors,
                     search_q=search_q,
-                    fps=fps,
+                    fps=adjusted_fps,
                 )
         return corridors

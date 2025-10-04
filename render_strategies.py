@@ -22,10 +22,10 @@ class RenderStrategy(ABC):
         pass
 
     def render_to_string(self, *args: object, **kwargs: object) -> str:
-        return self._render(live=False, *args, **kwargs)
+        return self._render(live=False, *args, **kwargs)  # type: ignore
 
     def render_to_screen(self, *args: object, **kwargs: object) -> None:
-        print(self._render(live=True, *args, **kwargs))
+        print(self._render(live=True, *args, **kwargs))  # type: ignore
 
 
 # == Concrete classes==
@@ -47,9 +47,14 @@ class ASCIIRender(RenderStrategy):
         lines: list[str] = []
         if live:
             lines.append("\x1b[H")  # Cursor to upper left
+
         if title_text:
             lines.append(title_text)
-        sleep(1 / fps if fps else 0)
+
+        # FPS control
+        if fps:
+            sleep(1 / fps)
+
         for y in range(size_y):
             line: list[str] = []
             for x in range(size_x):

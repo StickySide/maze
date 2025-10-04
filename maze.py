@@ -228,6 +228,8 @@ if __name__ == "__main__":
         gen_strat = RandomDFS()
     elif args.generator == "prim":
         gen_strat = RandomPrims()
+    elif args.generator == "empty":
+        gen_strat = EmptyMaze()
 
     if args.solver == "dfs":
         solve_strat = DFSSolver()

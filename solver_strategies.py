@@ -229,6 +229,8 @@ class BFSSolver(SolvingStrategy):
                         searched.add(nbr)  # Mark visited
                         parent[nbr] = cell  # Record the neighbors parent
 
+            adjusted_fps: float = fps * len(search_queue)
+
             if live and renderer:
                 renderer.render_to_screen(
                     size_x=size_x,
@@ -239,7 +241,7 @@ class BFSSolver(SolvingStrategy):
                     visited_cells=searched,
                     start=start,
                     end=end,
-                    fps=fps,
+                    fps=adjusted_fps,
                 )
 
         else:  # Queue exhausted: no path exists
