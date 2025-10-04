@@ -103,7 +103,7 @@ class RandomDFS(GenerationStrategy):
                     size_x=size_x,
                     size_y=size_y,
                     corridors=corridors,
-                    solution_path=None,
+                    solution_path=search_q,
                     start=None,
                     end=None,
                     fps=fps,

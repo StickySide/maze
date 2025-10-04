@@ -170,6 +170,8 @@ def generate_and_display_maze(
     )
 
     maze.generate(live=live, fps=fps)
+    if holes:
+        maze.hole_punch(holes)
     if live:
         maze.solve(live=live, fps=fps)
     else:
