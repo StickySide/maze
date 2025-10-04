@@ -3,7 +3,7 @@ from random import choice, randint
 from abc import ABC, abstractmethod
 from render_strategies import RenderStrategy
 from helper_functions import (
-    get_nieghbors,
+    get_neighbors,
     remove_out_of_bounds_neighbors,
     Coord,
 )
@@ -73,7 +73,7 @@ class RandomDFS(GenerationStrategy):
             next_cell = None
             current_cell = search_q.pop()
             # Look two steps away (because midpoints represent walls)
-            nbrs = get_nieghbors(current_cell, 2)
+            nbrs = get_neighbors(current_cell, 2)
             unvisited_nbrs = self.get_unvisited_neighbors(nbrs, visited)
 
             if unvisited_nbrs:
@@ -128,7 +128,7 @@ class RandomPrims(GenerationStrategy):
         )  # Random start
 
         # 'Frontier' cells, two block away from the start cell
-        search_q: set[Coord] = get_nieghbors(start_coord, 2, size_x, size_y)
+        search_q: set[Coord] = get_neighbors(start_coord, 2, size_x, size_y)
 
         # Carved out corridor cells
         corridors: set[Coord] = {start_coord}
@@ -140,7 +140,7 @@ class RandomPrims(GenerationStrategy):
             # Check neighbors of that frontier cell that connect to a corridor
             connecting_cells = [
                 nbr
-                for nbr in get_nieghbors(frontier_cell, 2, size_x, size_y)
+                for nbr in get_neighbors(frontier_cell, 2, size_x, size_y)
                 if nbr in corridors
             ]
 
@@ -155,7 +155,7 @@ class RandomPrims(GenerationStrategy):
             corridors.add(mid)
             corridors.add(frontier_cell)
             search_q.update(
-                get_nieghbors(frontier_cell, 2, size_x, size_y, exclude=corridors)
+                get_neighbors(frontier_cell, 2, size_x, size_y, exclude=corridors)
             )
             connecting_cells.remove(corridor_cell)
 

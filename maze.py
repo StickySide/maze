@@ -1,4 +1,5 @@
 from __future__ import annotations
+import argparse
 from dataclasses import dataclass
 from random import choice
 from generation_strategies import (
@@ -124,6 +125,32 @@ class Maze:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        prog="Maze generator",
+        description="Generate mazes and solutions using various algorithms",
+    )
+
+    # TODO: Add arguments for renderer, "Holes"
+    parser.add_argument("-x", type=int, help="Width of maze")
+    parser.add_argument("-y", type=int, help="Height of maze")
+    parser.add_argument(
+        "-g",
+        "--generator",
+        type=str,
+        help="Maze generation algorithm. dfs = Random depth first search, prim = Random prims",
+    )
+    parser.add_argument("-s", "--solver", type=str, help="Solution algorithm. ")
+    parser.add_argument(
+        "-l", "--live", help="Display generation/solution animated live"
+    )
+
+    # TODO: Finish assigning variables from args
+    args = parser.parse_args()
+    x = args.x if args.x else None
+    y = args.y if args.y else None
+
+    # TODO: Create function that returns a maze
+    # TODO: Call function with args to create a maze and run it
     maze = Maze(
         size_x=108,
         size_y=20,
@@ -133,33 +160,5 @@ if __name__ == "__main__":
         title_text=True,
     )
 
-    maze.generate(holes=10000)
-    solution = maze.solve(live=True, fps=120)
-
-    # dfs_times = []
-    # bfs_times = []
-    # for i in range(100):
-    #     start_time = time()
-    #     maze.solve()
-    #     end_time = time()
-    #     dfs_solution = maze.render()
-    #     total_time = end_time - start_time
-    #     dfs_times.append(total_time)
-    #     print(f"Iteration {i} time: {total_time}")
-
-    # maze.solve_strat = BFSSolver()
-    # for i in range(100):
-    #     start_time = time()
-    #     maze.solve()
-    #     end_time = time()
-    #     dfs_solution = maze.render()
-    #     total_time = end_time - start_time
-    #     bfs_times.append(total_time)
-    #     print(f"Iteration {i} time: {total_time}")
-
-    # print(
-    #     f"DFS Solver -- Average time for 100 solutions: {sum(dfs_times) / len(dfs_times)}"
-    # )
-    # print(
-    #     f"BFS Solver -- Average time for 100 solutions: {sum(bfs_times) / len(bfs_times)}"
-    # )
+    # maze.generate(holes=10000)
+    # solution = maze.solve(live=False, fps=120)

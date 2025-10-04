@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections import deque
 from random import shuffle
 from helper_functions import (
-    get_nieghbors,
+    get_neighbors,
     Coord,
     remove_out_of_bounds_neighbors,
 )
@@ -50,7 +50,7 @@ class DFSRecursiveSolver(SolvingStrategy):
             Returns:
                 A set of coordinates representing the path to the end cell, or an empty set if no path exists.
             """
-            nbrs = get_nieghbors(next_cell, 1)
+            nbrs = get_neighbors(next_cell, 1)
             nbrs = remove_out_of_bounds_neighbors(nbrs, size_x, size_y)
 
             if live and renderer:
@@ -130,7 +130,7 @@ class DFSSolver(SolvingStrategy):
 
         while search_q:
             current_cell = search_q.pop()
-            nbrs = get_nieghbors(
+            nbrs = get_neighbors(
                 coord=current_cell,
                 step=1,
                 size_x=size_x,
@@ -195,7 +195,9 @@ class BFSSolver(SolvingStrategy):
         searched = {start}  # Mark the start as searched
         parent: dict[Coord, Coord] = {}
 
-        def _reconstruct_path() -> list[Coord]:
+        def _reconstruct_path() -> list[
+            Coord
+        ]:  # Helper function to reconstruct path if a solution is found
             path: list[Coord] = [cell]
             while path[-1] != start:
                 path.append(parent[path[-1]])
@@ -212,16 +214,17 @@ class BFSSolver(SolvingStrategy):
                 )
             return path
 
+        # Main solving loop
         while search_queue:
             cell = search_queue.popleft()  # Pop the next coordinate
             if cell == end:  # End found!: reconstruct path
                 return set(_reconstruct_path())
 
             elif cell in corridors:  # Found new empty hallway/start
-                for nbr in get_nieghbors(cell, step=1):
+                for nbr in get_neighbors(cell, step=1):
                     if (
                         nbr not in searched and nbr in corridors
-                    ):  # If the cell isnt a wall or hasnt been visited...
+                    ):  # If the cell isn't a wall or hasn't been visited...
                         search_queue.append(nbr)  # Explore further later...
                         searched.add(nbr)  # Mark visited
                         parent[nbr] = cell  # Record the neighbors parent
