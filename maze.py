@@ -182,7 +182,11 @@ def generate_and_display_maze(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="Maze generator",
+        formatter_class=argparse.RawTextHelpFormatter,
         description="Generate mazes and solutions using various algorithms",
+        epilog="""Example: 'python maze.py -x 40 -y 20 -g prim -s dfs -o 10 -l -fps 60'
+         Animates a maze 40x20 in size, generated using Prims algorithm, solved using a depth first
+         search, with 10 randomly removed walls.""",
     )
 
     # TODO: Add arguments for renderer
@@ -192,19 +196,13 @@ if __name__ == "__main__":
         "-g",
         "--generator",
         type=str,
-        help="Maze generation algorithm. dfs (default) = Random depth first search, prim = Random prims",
+        help="Maze generation algorithm.\n'dfs' (default) = Random depth first search generator\n'prim' = Random prims generator",
     )
     parser.add_argument(
         "-s",
         "--solver",
         type=str,
-        help="Solution algorithm. dfs = Depth first search, bfs (default) = Breadth first search",
-    )
-    parser.add_argument(
-        "-l",
-        "--live",
-        action="store_true",
-        help="Display generation/solution animated live.",
+        help="Solution algorithm.\n'bfs' (default) = Breadth first search\n'dfs' = Depth first search",
     )
     parser.add_argument(
         "-o",
@@ -213,10 +211,15 @@ if __name__ == "__main__":
         help="Number of walls to randomly delete in the maze. Default: 0",
     )
     parser.add_argument(
+        "-l",
+        "--live",
+        action="store_true",
+        help="Display generation/solution animated live.",
+    )
+    parser.add_argument(
         "-f", "--fps", type=int, help="FPS to run the live render at. Default: 30"
     )
 
-    # TODO: Finish assigning variables from args
     # ? Does this even need to be assigned? Just pass args directly to function? Maybe yes so the variables can be controlled...
     args = parser.parse_args()
     x: int | None = args.x if args.x else None
@@ -238,8 +241,6 @@ if __name__ == "__main__":
     elif args.solver == "bfs":
         solve_strat = BFSSolver()
 
-    # TODO: Create function that returns a maze
-    # TODO: Call function with args to create a maze and run it
     generate_and_display_maze(
         x=x,
         y=y,
