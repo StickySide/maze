@@ -16,7 +16,7 @@ class RenderStrategy(ABC):
         search_q: set[Coord] | None = None,
         visited_cells: set[Coord] | None = None,
         live: bool = False,
-        fps: float = 0.0,
+        fps: int | None = None,
         title_text: str | None = None,
     ) -> str:
         pass
@@ -41,7 +41,7 @@ class ASCIIRender(RenderStrategy):
         search_q: set[Coord] | None = None,
         visited_cells: set[Coord] | None = None,
         live: bool = False,
-        fps: float = 0.0,
+        fps: int | None = None,
         title_text: str | None = None,
     ) -> str:
         lines: list[str] = []
@@ -49,7 +49,7 @@ class ASCIIRender(RenderStrategy):
             lines.append("\x1b[H")  # Cursor to upper left
         if title_text:
             lines.append(title_text)
-        sleep(1 / fps if fps != 0 else 0)
+        sleep(1 / fps if fps else 0)
         for y in range(size_y):
             line: list[str] = []
             for x in range(size_x):
