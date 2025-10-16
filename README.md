@@ -110,21 +110,6 @@ class MyCustomGenerator(GenerationStrategy):
 python maze.py -x 100 -y 40 --holes 50 --live --fps 30
 ```
 
-### Quick Generation, Slow Solving
-```bash
-python maze.py --live --fps 60 --generator prim
-# Then solve with slower animation to see the algorithm work
-python maze.py --live --fps 5 --solver bfs
-```
-
-### Algorithm Comparison
-```bash
-# Generate with DFS
-python maze.py --generator dfs --live
-
-# Generate with Prim's  
-python maze.py --generator prim --live
-```
 
 ## Contributing
 
