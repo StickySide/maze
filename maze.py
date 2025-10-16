@@ -152,14 +152,14 @@ def generate_and_display_maze(
     """Quick function to generate and display a maze. Used with argparse
 
     Args:
-        x (int, optional): _description_. Defaults to 40.
-        y (int, optional): _description_. Defaults to 40.
-        gen_strat (GenerationStrategy, optional): _description_. Defaults to RandomDFS().
-        solve_strat (SolvingStrategy, optional): _description_. Defaults to DFSSolver().
-        rend_strat (RenderStrategy, optional): _description_. Defaults to ASCIIRender().
-        holes (int, optional): _description_. Defaults to 0.
-        live (bool, optional): _description_. Defaults to False.
-        fps (int, optional): _description_. Defaults to 30.
+        x (int, optional): Width of maze. Defaults to 40.
+        y (int, optional): Height of maze. Defaults to 20.
+        gen_strat (GenerationStrategy, optional): Algorithm strategy to generate the maze. Defaults to RandomDFS().
+        solve_strat (SolvingStrategy, optional): Algorithm strategy to solve the maze. Defaults to BFSSolver().
+        rend_strat (RenderStrategy, optional): Render strategy. Defaults to ASCIIRender().
+        holes (int, optional): Number of walls to randomly remove. Defaults to 0.
+        live (bool, optional): If true, renders the maze live. Defaults to False.
+        fps (int, optional): Frames per second to render if live. Defaults to 30.
     """
     maze: Maze = Maze(
         size_x=x,
@@ -196,7 +196,7 @@ if __name__ == "__main__":
         "-g",
         "--generator",
         type=str,
-        help="Maze generation algorithm.\n'dfs' (default) = Random depth first search generator\n'prim' = Random prims generator",
+        help="Maze generation algorithm.\n'dfs' (default) = Random depth first search generator\n'prim' = Random prims generator\n'empty' = Empty maze (no walls)",
     )
     parser.add_argument(
         "-s",

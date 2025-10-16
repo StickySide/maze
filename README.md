@@ -76,7 +76,6 @@ maze = Maze(
     gen_strat=RandomPrims(),
     solve_strat=BFSSolver(),
     rend_strat=ASCIIRender(),
-    title_text=True
 )
 
 # Generate and solve with live animation
@@ -104,18 +103,7 @@ class MyCustomGenerator(GenerationStrategy):
 - Python 3.9+
 - No external dependencies (uses only standard library)
 
-
-## 🏗️ Architecture
-
-The project uses a strategy pattern for maximum flexibility:
-
-- **GenerationStrategy**: Abstract base for maze generation algorithms
-- **SolvingStrategy**: Abstract base for maze solving algorithms  
-- **RenderStrategy**: Abstract base for visualization methods
-
-This design makes it easy to add new algorithms or rendering methods without modifying existing code.
-
-## 🎯 Examples
+## Examples
 
 ### Large Maze with Holes
 ```bash
