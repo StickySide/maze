@@ -1,5 +1,4 @@
-Coord = tuple[int, int]
-"""Coord: Type alias for a coordinate pair (x, y) in the maze."""
+Coord = tuple[int, int]  # Coord: Type alias for a coordinate pair (x, y) in the maze.
 
 
 def get_neighbors(
@@ -27,13 +26,7 @@ def get_neighbors(
             (coord[0], coord[1] + step),  # South
             (coord[0] - step, coord[1]),  # West
         ]
-        return {
-            nbr
-            for nbr in nbrs
-            if 0 < nbr[0] < size_x - 1
-            and 0 < nbr[1] < size_y - 1
-            and nbr not in exclude
-        }
+        return {nbr for nbr in nbrs if 0 < nbr[0] < size_x - 1 and 0 < nbr[1] < size_y - 1 and nbr not in exclude}
     else:
         return {
             (coord[0], coord[1] - step),  # North
